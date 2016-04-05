@@ -1,0 +1,41 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute  vec4 vPosition;
+
+uniform mat4 projection;
+uniform mat4 modelview;
+
+void main() 
+{
+    gl_Position = projection * modelview * vPosition;
+} 
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+   
+uniform vec4 fColor;
+
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="./frogger/webgl-utils.js"></script>
+<script type="text/javascript" src="./frogger/initShaders.js"></script>
+<script type="text/javascript" src="./frogger/MV.js"></script>
+<script type="text/javascript" src="./frogger/frogger.js"></script>
+
+</head><body>
+
+<canvas id="gl-canvas" width="700" height="700">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+<br>
+
+
+
+</body></html>
