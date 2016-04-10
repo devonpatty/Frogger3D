@@ -1,11 +1,15 @@
 var canvas;
 var gl;
+var g_2dcanvas = document.getElementById("2dcanvas");
+var g_2dCtx = g_2dcanvas.getContext("2d");
 
 //-------Colors----------
-var BLUE = vec4(0.0, 0.0, 1.0, 1.0);
+var BLUE = vec4(0.137255, 0.419608, 0.556863, 1.0);
 var RED = vec4(1.0, 0.0, 0.0, 1.0);
+var GREEN = vec4(0.196078, 0.8, 0.196078, 1.0);
 var GRAY = vec4(0.4, 0.4, 0.4, 1.0);
 var YELLOW = vec4(1.0, 1.0, 0.0, 1.0);
+var BROWN = vec4(0.52, 0.37, 0.26, 1.0);
 //-------------------------
 
 var numCubeVertices  = 36;
@@ -25,13 +29,24 @@ var moveY = 1.0;
 //------------------------
 
 //---------Testing purpose------------
-var userXPos = 0.0;
-var userYPos = -120.0;
+var userXPos = 30.0;
+var userYPos = -90.0;
+var userZPos = 30.0;
 var userIncr = 2.0;                // Size of forward/backward step
 var userAngle = 90.0;              // Direction of the user in degrees
 var userXDir = 0.0;                // X-coordinate of heading
 var userYDir = 1.0;                // Y-coordinate of heading
+var userZDir = 0.0;
 //------------------------------------
+
+var _cars = [];
+var _logs = [];
+var _frog = [];
+var _insects = [];
+var _generator = [];
+
+var keys = [];
+var tileSize = 4.0;
 
 var colorLoc;
 var mvLoc;
@@ -39,6 +54,8 @@ var pLoc;
 var proj;
 
 var cubeBuffer;
+var carNormalsBuffer;
+var carBuffer;
 var trackBuffer;
 var vPosition;
 
@@ -64,6 +81,47 @@ var cVertices = [
     vec3( -0.5, -0.5,  0.5 ), vec3( -0.5,  0.5,  0.5 ), vec3( -0.5,  0.5, -0.5 )
 ];
 
+function initializeStart() {
+	this.lives = 3;
+	this.totalScore = 0;
+	this.time = 30000;
+	this.startTime = new Date().getTime();
+};
+
+function loseLife() {
+	if(this.lives > 1) {
+		this.lives--;
+		this.time = 30000;
+		this.startTime = new Date().getTime();
+	} else {
+		initializeStart();
+	}
+};
+
+function collideWithInsect(cx, cy) {
+	var pos = levels.toRC(cx, cy);
+	var bugs = this._insects;
+	for(var i = 0; i < bugs.length; i++) {
+		var bugPosition = bugs[i].getPosition();
+		if(bugPosition.row == pos.row && bugPosition.col == pos.col) {
+			bugs.splice(i, 1);
+			this._frog[0].setScore(3);
+		}
+	}
+};
+
+function generateInsect(descr) {
+	this._insects.push(new Insect(descr));
+};
+
+function generateCar(descr) {
+	this._cars.push(new Car(descr));
+};
+
+function generateLog(descr) {
+	this._logs.push(new Log(descr));
+};
+
 window.onload = function init()
 {
     canvas = document.getElementById( "gl-canvas" );
@@ -75,13 +133,30 @@ window.onload = function init()
     gl.clearColor( 0.7, 1.0, 0.7, 1.0 );
     
     gl.enable(gl.DEPTH_TEST);
+	
+	var PR = PlyReader();
+	var car = PR.read("lexus_hs.ply");
 
+	var carVertices = car.points;
+	var carNormals = car.normals;
+
+	this.initializeStart();
+	
+	this._generator.push(new GenerateEntity);
+	this._frog.push( new Frog(0.0, 0.0, 0.0) );
+	this._categories = [this._generator, this._cars, this._logs, this._insects, this._frog];
+
+	
     //
     //  Load shaders and initialize attribute buffers
     //
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
     
+	carNormalsBuffer = gl.createBuffer();
+	gl.bindBuffer( gl.ARRAY_BUFFER, carNormalsBuffer);
+	gl.bufferData( gl.ARRAY_BUFFER, flatten(carNormalsBuffer), gl.STATIC_DRAW);
+	
     //createTrack();
     /*
     // VBO for the track
@@ -93,7 +168,11 @@ window.onload = function init()
     cubeBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cubeBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(cVertices), gl.STATIC_DRAW );
-
+	
+	// VBO for PLY the car
+	carBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, carBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, flatten(carVertices), gl.DYNAMIC_DRAW );
 
     vPosition = gl.getAttribLocation( program, "vPosition" );
     gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
@@ -105,97 +184,76 @@ window.onload = function init()
 
     // set projection
     pLoc = gl.getUniformLocation( program, "projection" );
-    proj = perspective( 50.0, 1.0, 1.0, 500.0 );
+    proj = perspective( 70.0, 1.0, 1.0, 500.0 );
     gl.uniformMatrix4fv(pLoc, false, flatten(proj));
 
     window.addEventListener("keydown", function(e){
-        switch( e.keyCode ) {
-			case 49:
-				view = 1;
-				break;
-			case 50:
-				view = 0;
-				break;
-			case 87:	// w key
-				moveX -= 0.5;
-				break;
-			case 65:	// a key
-				moveY -= 0.5;
-				break;
-			case 83:	// s key
-				moveX += 0.5;
-				break;
-			case 68:	// d key
-				moveY += 0.5;
-				break;			
-			case 37:    // left arrow
-                userAngle += 3.0;
-                userXDir = Math.cos( radians(userAngle) );
-                userYDir = Math.sin( radians(userAngle) );
-                break;
-            case 38:    // up arrow
-                userXPos += userIncr * userXDir;
-                userYPos += userIncr * userYDir;
-                break;
-            case 39:    // right arrow
-                userAngle -= 3.0;
-                userXDir = Math.cos( radians(userAngle) );
-                userYDir = Math.sin( radians(userAngle) );
-                break;
-            case 40:    // down arrow
-                userXPos -= userIncr * userXDir;
-                userYPos -= userIncr * userYDir;
-                break;
-		}
+        keys[e.keyCode] = true;
 	} );
 	
-    render();
-}
-
-// draw car as two blue cubes
-function drawCar( mv ) {
-
-    // set color to blue
-    gl.uniform4fv( colorLoc, BLUE );
-    
-    gl.bindBuffer( gl.ARRAY_BUFFER, cubeBuffer );
-    gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
-
-    var mv1 = mv;
-    // lower body of the car
-    mv = mult( mv, scalem( 10.0, 3.0, 2.0 ) );
-    mv = mult( mv, translate( 0.0, 0.0, 0.5 ) );
-
-    gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
-    gl.drawArrays( gl.TRIANGLES, 0, numCubeVertices );
-
-    // upper part of the car
-    mv1 = mult( mv1, scalem( 4.0, 3.0, 2.0 ) );
-    mv1 = mult( mv1, translate( -0.2, 0.0, 1.5 ) );
-
-    gl.uniformMatrix4fv(mvLoc, false, flatten(mv1));
-    gl.drawArrays( gl.TRIANGLES, 0, numCubeVertices );
-}
-    
-function render()
-{
-    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-	var mv = mat4();
+	window.addEventListener("keyup", function(e) {
+		keys[e.keyCode] = false;
+	} );
 	
-	switch( view ) {
-		case 1:
-			mv = lookAt( vec3(50.0+moveX, 20.0+moveY, 0.0), vec3(0.0+moveX, 0.0+moveY, 0.0), vec3(0.0, 0.0, 1.0) );
-			mv = mult( mv, translate( 0.0, 0.0, 0.0 ) );
-			drawCar( mv );
-			break;
-		case 0:
-			case 0:
-			// From the ground, walking around
-			mv = lookAt( vec3(userXPos, userYPos, 5.0), vec3(userXPos+userXDir, userYPos+userYDir, 5.0), vec3(0.0, 0.0, 1.0 ) );
-			mv = mult( mv, translate( 0.0, 0.0, 0.0 ) );
-			drawCar( mv );
-			break;
+    update();
+}
+
+function update() {
+	for(var i = 0; i < this._categories.length; i++) {
+		var category = this._categories[i];
+		for(var j = 0; j < category.length; j++) {
+			var status = category[j].update();
+			if(status == -1) {
+				category.splice(j, 1);
+				j--;
+			}
+		}
+	}	
+	var currentTime = new Date().getTime();
+	this.time -= currentTime - this.startTime;
+	this.startTime = currentTime;
+
+	if(this.time < 0) {
+		this._frog[0].die();
 	}
-    requestAnimFrame( render );
+	render(g_2dCtx);
+}
+
+var counter = 0;
+
+function render(ctx)
+{
+    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	
+	
+	var mv = mat4();
+
+	mv = lookAt( vec3(0.0, -10.0+this._frog[0].y, 30.0), vec3(0.0, this._frog[0].y, 0.0), vec3(0.0, 0.0, 1.0) );
+	for(var i = 0; i < this._categories.length; i++) {
+		var category = this._categories[i];
+		for(var j = 0; j < category.length; j++) {
+			category[j].draw( mv );
+		}
+	}
+	
+	if(counter % 100 == 0) {
+		for(var i = 0; i < levels[1].array.length; i++) {
+			//console.log(i + "  " + levels[1].array[i].toString())
+		}
+	}
+	counter++;
+
+	ctx.clearRect(0, 0, 600, 50);
+	
+	ctx.fillStyle = "Black";
+	ctx.fillRect(0, 0, 600, 50);
+	ctx.fillStyle = "White";
+	ctx.font = "25px Arial";
+	ctx.fillText("Lives: " + this.lives, 10, 35);
+
+	ctx.fillText("Time: " + (this.time/1000).toFixed(1), 235, 35);
+
+	var getScore = this.totalScore + this._frog[0].getScore();
+	ctx.fillText("Score: " + getScore, 480, 35);
+
+    requestAnimFrame( update );
 }

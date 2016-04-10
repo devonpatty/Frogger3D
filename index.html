@@ -23,17 +23,26 @@ main()
     gl_FragColor = fColor;
 }
 </script>
-
+<canvas id="2dcanvas" width="600" height="50" style="position: absolute; bottom: 30px; z-index: 1">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
 <script type="text/javascript" src="./frogger/webgl-utils.js"></script>
 <script type="text/javascript" src="./frogger/initShaders.js"></script>
 <script type="text/javascript" src="./frogger/MV.js"></script>
+<script type="text/javascript" src="./frogger/Car.js"></script>
+<script type="text/javascript" src="./frogger/Frog.js"></script>
+<script type="text/javascript" src="./frogger/levels.js"></script>
+<script type="text/javascript" src="./frogger/Log.js"></script>
+<script type="text/javascript" src="./frogger/GenerateEntity.js"></script>
+<script type="text/javascript" src="./frogger/Insect.js"></script>
+<script type="text/javascript" src="./frogger/PlyReader.js"></script>
 <script type="text/javascript" src="./frogger/frogger.js"></script>
-
 </head><body>
 
-<canvas id="gl-canvas" width="700" height="700">
+<canvas id="gl-canvas" width="600" height="600" style="position: absolute; z-index: 0">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
+
 <br>
 
 

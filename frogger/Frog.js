@@ -1,0 +1,97 @@
+function Frog(x, y, z) {
+	this.x = x;
+	this.initialX = this.x;
+	this.y = y;
+	this.initialY = this.y;
+	this.nextY = this.y;
+	this.z = z;
+	this.nextZ = this.z;
+	this.vel = 0.25;
+	this.hopping = false;
+	this.currentScore = 0;
+};
+
+Frog.prototype.update = function() {
+	//console.log(this.delay)
+	if(this.hopping) {
+		if(this.y > this.nextY) {
+			this.y -= this.vel;
+		}
+		if(this.y < this.nextY) {
+			this.y += this.vel;
+		}
+		if(this.y == this.nextY) {
+			this.hopping = false;
+		}
+	} else {
+		if(keys[37]) { // left arrow
+			if(this.x > 0-levels.getLength()) this.x -= this.vel;
+		} else if(keys[38]) { // up arrow
+			this.hopping = true;
+			if(levels.inArray(this.x, this.y + tileSize, 1)) {
+				this.nextY = this.y + tileSize;			
+				this.currentScore += 1;
+			}
+		} else if(keys[39]) { // right arrow
+			if(this.x < levels.getLength()) this.x += this.vel;
+		} else if(keys[40]) { // down arrow
+			this.hopping = true;
+			if(levels.inArray(this.x, this.y - tileSize, 1)) {
+				this.nextY = this.y - tileSize;			
+				this.currentScore -= 1;
+			}
+		}
+	}
+
+	var lane = levels.getLane(this.x, this.y);
+	if( lane.type == "water" ) {
+		this.x -= lane.speed;
+	}
+
+	collideWithInsect(this.x, this.y);
+
+	if(levels.collision(this.x, this.y) || this.x > levels.getLength() || this.x < 0-levels.getLength()){
+		this.die();
+	}
+
+	if(levels.getHeight() == this.y) {
+		console.log("You have won ");
+	}
+	//console.log(levels.getHeight(), this.y)
+};
+
+Frog.prototype.die = function() {
+	this.x = this.initialX;
+	this.y = this.initialY;
+	this.nextY = this.y;
+	this.hopping = false;
+	this.currentScore = 0;
+	loseLife();
+};
+
+Frog.prototype.getScore = function() {
+	return this.currentScore;
+};
+
+Frog.prototype.setScore = function(x) {
+	return this.currentScore += x;
+};
+
+Frog.prototype.draw = function( mv ) {
+	
+	mv = mult( mv, translate( this.x, this.y, 0.0 ) );	
+	
+	// set color to green
+    gl.uniform4fv( colorLoc, GREEN );
+    
+    gl.bindBuffer( gl.ARRAY_BUFFER, cubeBuffer );
+    gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
+
+    // the frog
+    mv = mult( mv, scalem( 2.0, 2.0, 2.0 ) );
+    mv = mult( mv, translate( 0.0, 0.0, 0.5 ) );
+
+    gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
+    gl.drawArrays( gl.TRIANGLES, 0, numCubeVertices );
+
+};
