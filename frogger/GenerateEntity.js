@@ -17,22 +17,26 @@ GenerateEntity.prototype.update = function() {
 					lanes[i].next = Math.floor(Math.random()*2000+1000);
 					break;
 				case "road":
-					var x = lanes[i].direction == "right" ? levels.getLength() : -levels.getLength();
+					var size = Math.floor(Math.random()*3+5);
+					var x = lanes[i].direction == "right" ? levels.getLength()-1.0+size*tileSize/2 : 1.0-size*tileSize/2;
 					var y = i*tileSize;
 					generateCar({
 						x: x,
 						y: y,
-						vel: lanes[i].speed
+						vel: lanes[i].speed,
+						size: size
 					});
 					lanes[i].next = Math.floor(Math.random()*200 + 200);
 					break;
 				case "water":
-					var x = lanes[i].direction == "right" ? levels.getLength() : -levels.getLength();
+					var size = Math.floor(Math.random()*3+5);
+					var x = lanes[i].direction == "right" ? levels.getLength()-1.0+size*tileSize/2 : 1.0-size*tileSize/2;
 					var y = i*tileSize;
 					generateLog({
 						x: x,
 						y: y,
-						vel: lanes[i].speed
+						vel: lanes[i].speed,
+						size: size
 					});
 					lanes[i].next = Math.floor(Math.random()*200 + 200);
 					break;

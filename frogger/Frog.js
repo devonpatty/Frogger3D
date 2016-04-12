@@ -1,7 +1,7 @@
 function Frog(x, y, z) {
-	this.x = x;
+	this.x = x*tileSize + tileSize/2;
 	this.initialX = this.x;
-	this.y = y;
+	this.y = y*tileSize + tileSize/2;
 	this.initialY = this.y;
 	this.nextY = this.y;
 	this.z = z;
@@ -25,10 +25,10 @@ Frog.prototype.update = function() {
 		}
 	} else {
 		if(keys[37]) { // left arrow
-			if(this.x > 0-levels.getLength()) this.x -= this.vel;
+			if(this.x > 0) this.x -= this.vel;
 		} else if(keys[38]) { // up arrow
 			this.hopping = true;
-			if(levels.inArray(this.x, this.y + tileSize, 1)) {
+			if(this.y + tileSize < levels.getHeight()) {
 				this.nextY = this.y + tileSize;			
 				this.currentScore += 1;
 			}
@@ -36,7 +36,7 @@ Frog.prototype.update = function() {
 			if(this.x < levels.getLength()) this.x += this.vel;
 		} else if(keys[40]) { // down arrow
 			this.hopping = true;
-			if(levels.inArray(this.x, this.y - tileSize, 1)) {
+			if(this.y - tileSize > 0) {
 				this.nextY = this.y - tileSize;			
 				this.currentScore -= 1;
 			}
@@ -55,7 +55,12 @@ Frog.prototype.update = function() {
 	}
 
 	if(levels.getHeight() == this.y) {
-		console.log("You have won ");
+		this.x = this.initialX;
+		this.y = this.initialY;
+		this.nextY = this.y;
+		this.hopping = false;
+		toNextLevel();
+		this.currentScore = 0;
 	}
 	//console.log(levels.getHeight(), this.y)
 };

@@ -1,14 +1,14 @@
 // draw Insect as two blue cubes
 function Insect(descr) {
 	this.x = descr.x;
-	this.y = descr.y;
+	this.y = descr.y + tileSize/2;
 	this.vel = 0.06;
 	this.size = 1;
 };
 
 Insect.prototype.update = function() {
 	this.x -= this.vel;
-	if(!levels.inArray(this.x, this.y, this.size)) {
+	if(!levels.inArray(this.x-(this.size*tileSize)/2, this.x+(this.size*tileSize)/2, this.y)) {
 		return -1;
 	}
 };

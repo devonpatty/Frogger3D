@@ -1,24 +1,25 @@
 function Log(descr) {
 	this.x = descr.x;
-	this.y = descr.y;
-	this.vel = descr.vel;
-	this.size = 3;
+	this.y = descr.y + tileSize/2;
+	this.vel = descr.vel + getLevel()*0.004;
+	this.size = descr.size;
+	
 };
 
 Log.prototype.update = function() {
-	levels.unregister(this.x, this.y, this.size);
+	levels.unregister(this.x-(this.size*tileSize)/2, this.x+(this.size*tileSize)/2, this.y, 1);
 	
 	this.x -= this.vel;
-	if(!levels.inArray(this.x, this.y, this.size)) {
+	if(!levels.inArray(this.x-(this.size*tileSize)/2, this.x+(this.size*tileSize)/2, this.y)) {
 		return -1;
 	}
 
-	levels.register(this.x, this.y, this.size);
+	levels.register(this.x-(this.size+tileSize)/2, this.x+(this.size*tileSize)/2, this.y, 0);
 };
 
 Log.prototype.draw = function( mv ) {
 	
-	mv = mult( mv, translate( this.x+tileSize, this.y, 0.0 ) );
+	mv = mult( mv, translate( this.x, this.y, 0.0 ) );
     
 	// set color to brown
     gl.uniform4fv( colorLoc, BROWN );
@@ -27,8 +28,8 @@ Log.prototype.draw = function( mv ) {
     gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
 
     // the log
-    mv = mult( mv, scalem( 10.0, 3.0, 2.0 ) );
-    mv = mult( mv, translate( 0.0, 0.0, -2.0 ) );
+    mv = mult( mv, scalem( this.size*(tileSize-0.5), 2.0, 1.0 ) );
+    mv = mult( mv, translate( 0.0, 0.0, -1.0 ) );
 
     gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
     gl.drawArrays( gl.TRIANGLES, 0, numCubeVertices );

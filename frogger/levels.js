@@ -35,39 +35,32 @@ var levels = {
 		]
 	},
 	
-	register: function(cx, cy, size) {
-		var pos = this.toRC(cx, cy);
-		for(var i = 0; i < size; i++) {
-			if(pos.col+i < this[1].array[pos.row].length) {
-				if(this[1].array[pos.row][pos.col+i] == 0) {
-					this[1].array[pos.row][pos.col+i] = 1;
-				} else {
-					this[1].array[pos.row][pos.col+i] = 0;
-				}
+	register: function(sx, ex, y, res) {
+		var sPos = this.toRC(sx, y);
+		var ePos = this.toRC(ex, y);
+		for(var i = sPos.col; i < ePos.col; i++) {
+			if(i < this[1].array[sPos.row].length) {
+				this[1].array[sPos.row][i] = res;
 			}
 		}
 	},
 	
-	unregister: function(cx, cy, size) {
-		var pos = this.toRC(cx, cy);
-		for(var i = 0; i < size; i++) {
-			if(pos.col+i < this[1].array[pos.row].length) {
-				if(this[1].array[pos.row][pos.col+i] == 1) {
-					this[1].array[pos.row][pos.col+i] = 0;
-				} else {
-					this[1].array[pos.row][pos.col+i] = 1;
-				}
+	unregister: function(sx, ex, y, res) {
+		var sPos = this.toRC(sx, y);
+		var ePos = this.toRC(ex, y);
+		for(var i = sPos.col; i < ePos.col; i++) {
+			if(i < this[1].array[sPos.row].length) {
+				this[1].array[sPos.row][i] = res;
 			}
 		}
 	},
 	
-	inArray: function(cx, cy, size) {
-		var pos = this.toRC(cx, cy);
-		for(var i = 0; i < size; i++) {
-			if( pos.row >= 0 && pos.row < this[1].array.length
-			&& pos.col+i >= 0 && pos.col+i < this[1].array[pos.row].length) {				
-				return true;
-			}
+	inArray: function(sx, ex, y) {
+		var sPos = this.toRC(sx, y);
+		var ePos = this.toRC(ex, y);
+		if( sPos.row >= 0 || ePos.row < this[1].array.length
+		&& sPos.col >= 0 || ePos.col < this[1].array[ePos.row].length) {				
+			return true;
 		}
 		return false;
 	},
@@ -82,10 +75,8 @@ var levels = {
 	},
 	
 	toRC: function(x, y) {
-		var posX = x + (this[1].array[0].length*tileSize)/2;
-		var posY = y;
-		var row = Math.floor(posY/tileSize);
-		var col = Math.floor(posX/tileSize);
+		var row = Math.floor(y/tileSize);
+		var col = Math.floor(x/tileSize);
 		return {
 			row: row,
 			col: col
@@ -98,10 +89,10 @@ var levels = {
 	},
 
 	getLength: function() {
-		return this[1].array[0].length*tileSize - (this[1].array[0].length*tileSize)/2;
+		return this[1].array[0].length*tileSize;
 	},
 
 	getHeight: function() {
-		return this[1].array.length*tileSize - tileSize;
+		return this[1].array.length*tileSize;
 	}
 };
