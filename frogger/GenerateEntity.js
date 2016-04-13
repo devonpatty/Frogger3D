@@ -17,7 +17,7 @@ GenerateEntity.prototype.update = function() {
 					lanes[i].next = Math.floor(Math.random()*2000+1000);
 					break;
 				case "road":
-					var size = Math.floor(Math.random()*3+5);
+					var size = Math.floor(Math.random()*5+8);
 					var x = lanes[i].direction == "right" ? levels.getLength()-1.0+size*tileSize/2 : 1.0-size*tileSize/2;
 					var y = i*tileSize;
 					generateCar({
@@ -26,10 +26,10 @@ GenerateEntity.prototype.update = function() {
 						vel: lanes[i].speed,
 						size: size
 					});
-					lanes[i].next = Math.floor(Math.random()*200 + 200);
+					lanes[i].next = Math.floor((Math.random()*100+200) - getLevel()*15);
 					break;
 				case "water":
-					var size = Math.floor(Math.random()*3+5);
+					var size = Math.floor(Math.random()*5+8);
 					var x = lanes[i].direction == "right" ? levels.getLength()-1.0+size*tileSize/2 : 1.0-size*tileSize/2;
 					var y = i*tileSize;
 					generateLog({
@@ -38,7 +38,7 @@ GenerateEntity.prototype.update = function() {
 						vel: lanes[i].speed,
 						size: size
 					});
-					lanes[i].next = Math.floor(Math.random()*200 + 200);
+					lanes[i].next = Math.floor((Math.random()*200+200) - getLevel()*15);
 					break;
 			}	
 		} else {

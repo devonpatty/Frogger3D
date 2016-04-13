@@ -5,11 +5,15 @@ var g_2dCtx = g_2dcanvas.getContext("2d");
 
 //-------Colors----------
 var BLUE = vec4(0.137255, 0.419608, 0.556863, 1.0);
+var SEACOLOR = vec4(0.196078, 0.6, 0.8, 1.0);
 var RED = vec4(1.0, 0.0, 0.0, 1.0);
-var GREEN = vec4(0.196078, 0.8, 0.196078, 1.0);
+var ORCHID = vec4(0.858824, 0.439216, 0.858824, 1.0);
+var GREEN = vec4(0.137255, 0.556863, 0.137255, 1.0);
+var GRASSCOLOR = vec4(0.576471, 0.858824, 0.439216, 1.0);
 var GRAY = vec4(0.4, 0.4, 0.4, 1.0);
-var YELLOW = vec4(1.0, 1.0, 0.0, 1.0);
-var BROWN = vec4(0.52, 0.37, 0.26, 1.0);
+var YELLOW = vec4(1.0, 1.0, 0.3, 1.0);
+var BROWN = vec4(0.65, 0.5, 0.39, 1.0);
+var BLACK = vec4(0.2, 0.2, 0.2, 1.0);
 //-------------------------
 
 var numCubeVertices  = 36;
@@ -46,7 +50,7 @@ var _insects = [];
 var _generator = [];
 
 var keys = [];
-var tileSize = 2.0;
+var tileSize = 1.0;
 
 var colorLoc;
 var mvLoc;
@@ -94,6 +98,8 @@ function toNextLevel() {
 	this.totalScore += this._frog[0].getScore();
 	this.time = 30000 - 500*this.level;
 	this.startTime = new Date().getTime();
+	won = true;
+	message = Math.floor(Math.random()*wonMessage.length);
 };
 
 function getLevel() {
@@ -142,7 +148,7 @@ window.onload = function init()
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
     gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 0.7, 1.0, 0.7, 1.0 );
+    gl.clearColor(  0.89, 0.47, 0.2, 1.0 );
     
     gl.enable(gl.DEPTH_TEST);
 	/*
@@ -155,6 +161,7 @@ window.onload = function init()
 	this.initializeStart();
 	
 	this._generator.push(new GenerateEntity);
+	//this._cars.push(new Car({x: 0.0, y: 0.0, vel: 0, size: 3}));
 	this._frog.push( new Frog(5, 0, 0.0) );
 	this._categories = [this._generator, this._cars, this._logs, this._insects, this._frog];
 
@@ -224,7 +231,16 @@ function update() {
 	var currentTime = new Date().getTime();
 	this.time -= currentTime - this.startTime;
 	this.startTime = currentTime;
-
+	
+	if(won) {
+		if(wonCount > 0) {
+			wonCount--;
+		} else {
+			wonCount = 80;
+			won = false;
+		}
+	}
+	
 	if(this.time < 0) {
 		this._frog[0].die();
 	}
@@ -232,6 +248,10 @@ function update() {
 }
 
 var counter = 0;
+var message = 0;
+var won = false;
+var wonCount = 80;
+var wonMessage = ["Good Job!", "You are a PRO!!!", "Just do it!!", "Ninja Frooog!", "Is it even worth it?", "Well done", "Like a boss", "You like it rough?"];
 
 function render(ctx)
 {
@@ -239,30 +259,37 @@ function render(ctx)
 	
 	var mv = mat4();
 
-	mv = lookAt( vec3(levels.getLength()/2, -10.0+this._frog[0].y, 40.0), vec3(levels.getLength()/2, this._frog[0].y, -20.0), vec3(0.0, 0.0, 1.0) );
+	mv = lookAt( vec3(levels.getLength()/2, -5.0+this._frog[0].y, 15.0), vec3(levels.getLength()/2, this._frog[0].y, 0.0), vec3(0.0, 0.0, 1.0) );
 	for(var i = 0; i < this._categories.length; i++) {
 		var category = this._categories[i];
 		for(var j = 0; j < category.length; j++) {
 			category[j].draw( mv );
 		}
 	}
+	
 	for(var j = 0; j < levels[1].array.length; j++){
-		for(var i = 0; i < levels[1].array[j].length; i++) {
-			var mv1 = mult( mv, translate( i*tileSize+tileSize/2, j*tileSize+tileSize/2, -2.0 ) );
-    
-			// set color to brown
-			gl.uniform4fv( colorLoc, RED );
+			var mv1 = mult( mv, translate( levels.getLength()/2, tileSize*j+tileSize/2, -2.0 ) );
+			var color = levels[1].lanes[j].type;
+			switch(color) {
+				case "water":
+					gl.uniform4fv( colorLoc, SEACOLOR );
+					break;
+				case "road":
+					gl.uniform4fv( colorLoc, BLACK );
+					break;
+				case "grass":
+					gl.uniform4fv( colorLoc, GRASSCOLOR );
+					break;
+			}
 			
 			gl.bindBuffer( gl.ARRAY_BUFFER, cubeBuffer );
 			gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
 
-			// the log
-			mv1 = mult( mv1, scalem( tileSize-0.5, tileSize-0.5, 2.0 ) );
-			mv1 = mult( mv1, translate( 0.0, 0.0, 0.0 ) );
+			mv1 = mult( mv1, scalem( levels.getLength(), tileSize, 0.0 ) );
+			mv1 = mult( mv1, translate( 0.0, 0.0, 0.5 ) );
 
 			gl.uniformMatrix4fv(mvLoc, false, flatten(mv1));
-			gl.drawArrays( gl.TRIANGLES, 0, numCubeVertices );	
-		}
+			gl.drawArrays( gl.TRIANGLES, 0, numCubeVertices );
 	}
 	
 	
@@ -277,20 +304,26 @@ function render(ctx)
 	}
 	counter++;
 
-	ctx.clearRect(0, 0, 600, 50);
+	ctx.clearRect(0, 0, 600, 600);
 	
 	ctx.fillStyle = "Black";
-	ctx.fillRect(0, 0, 600, 50);
+	ctx.fillRect(0, 550, 600, 50);
 	ctx.fillStyle = "White";
 	ctx.font = "25px Arial";
-	ctx.fillText("Lives: " + this.lives, 10, 35);
+	ctx.fillText("Lives: " + this.lives, 10, 585);
 
-	ctx.fillText("Time: " + (this.time/1000).toFixed(1), 150, 35);
-
-	ctx.fillText("Level: " + this.level, 330, 35);
+	ctx.fillText("Time: ", 150, 35);
+	
+	ctx.fillRect(220, 18, 200*(this.time/(30000 - 500*this.level)), 20);
+	
+	ctx.fillText("Level: " + this.level, 240, 585);
 
 	var getScore = this.totalScore + this._frog[0].getScore();
-	ctx.fillText("Score: " + getScore, 480, 35);
+	ctx.fillText("Score: " + getScore, 480, 585);
 
+	if(won) {
+		ctx.fillText(wonMessage[message], 200, 500);
+	}
+	
     requestAnimFrame( update );
 }

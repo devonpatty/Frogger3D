@@ -1,18 +1,27 @@
 var levels = {
 	1: {
 		array: [
-			[0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0],
-			[0,0,0,0,0,0,0,0,0,0,0],
-			[1,1,1,1,1,1,1,1,1,1,1],
-			[1,1,1,1,1,1,1,1,1,1,1],
-			[1,1,1,1,1,1,1,1,1,1,1],
-			[1,1,1,1,1,1,1,1,1,1,1],
-			[0,0,0,0,0,0,0,0,0,0,0]
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+			[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+			[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+			[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+			[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 		],
 		
 		// type = "grass", "road", "water"
@@ -22,16 +31,25 @@ var levels = {
 		lanes: [
 			{type: "grass", direction: "neutral", speed: 0.0, next: 0},
 			{type: "grass", direction: "neutral", speed: 0.0, next: 0},
-			{type: "road", direction: "right", speed: 0.09, next: 0},
+			{type: "grass", direction: "neutral", speed: 0.0, next: 0},
+			{type: "road", direction: "left", speed: -0.09, next: 0},
 			{type: "road", direction: "right", speed: 0.1, next: 0},
 			{type: "road", direction: "left", speed: -0.1, next: 0},
-			{type: "road", direction: "left", speed: -0.09, next: 0},
+			{type: "road", direction: "right", speed: 0.09, next: 0},
 			{type: "grass", direction: "right", speed: 0.0, next: 0},
 			{type: "water", direction: "left", speed: -0.09, next: 0},
 			{type: "water", direction: "right", speed: 0.11, next: 0},			
 			{type: "water", direction: "left", speed: -0.08, next: 0},
 			{type: "water", direction: "right", speed: 0.1, next: 0},
-			{type: "grass", direction: "neutral", speed: 0.0, next: 0}
+			{type: "grass", direction: "neutral", speed: 0.0, next: 0},
+			{type: "road", direction: "right", speed: 0.1, next: 0},
+			{type: "road", direction: "right", speed: 0.1, next: 0},
+			{type: "road", direction: "right", speed: 0.1, next: 0},
+			{type: "road", direction: "left", speed: -0.1, next: 0},
+			{type: "road", direction: "left", speed: -0.1, next: 0},
+			{type: "road", direction: "left", speed: -0.1, next: 0},
+			{type: "grass", direction: "right", speed: 0.1, next: 0},
+			{type: "grass", direction: "neutral", speed: 0.1, next: 0}
 		]
 	},
 	
@@ -58,8 +76,8 @@ var levels = {
 	inArray: function(sx, ex, y) {
 		var sPos = this.toRC(sx, y);
 		var ePos = this.toRC(ex, y);
-		if( sPos.row >= 0 || ePos.row < this[1].array.length
-		&& sPos.col >= 0 || ePos.col < this[1].array[ePos.row].length) {				
+		if( sPos.row >= 0 && ePos.row < this[1].array.length
+		&& sPos.col >= 0 && ePos.col < this[1].array[ePos.row].length) {				
 			return true;
 		}
 		return false;

@@ -6,7 +6,7 @@ function Frog(x, y, z) {
 	this.nextY = this.y;
 	this.z = z;
 	this.nextZ = this.z;
-	this.vel = 0.25;
+	this.vel = 0.1;
 	this.hopping = false;
 	this.currentScore = 0;
 };
@@ -20,20 +20,23 @@ Frog.prototype.update = function() {
 		if(this.y < this.nextY) {
 			this.y += this.vel;
 		}
-		if(this.y == this.nextY) {
+		if(Math.abs(this.y - this.nextY) < this.vel) {
+			this.y = this.nextY;
 			this.hopping = false;
 		}
 	} else {
 		if(keys[37]) { // left arrow
-			if(this.x > 0) this.x -= this.vel;
-		} else if(keys[38]) { // up arrow
+			if(this.x - this.vel > 0) this.x -= this.vel;
+		} else if(keys[39]) { // right arrow
+			if(this.x + this.vel < levels.getLength()) this.x += this.vel;
+		}
+		
+		if(keys[38]) { // up arrow
 			this.hopping = true;
 			if(this.y + tileSize < levels.getHeight()) {
 				this.nextY = this.y + tileSize;			
 				this.currentScore += 1;
-			}
-		} else if(keys[39]) { // right arrow
-			if(this.x < levels.getLength()) this.x += this.vel;
+			} 	
 		} else if(keys[40]) { // down arrow
 			this.hopping = true;
 			if(this.y - tileSize > 0) {
@@ -45,16 +48,16 @@ Frog.prototype.update = function() {
 
 	var lane = levels.getLane(this.x, this.y);
 	if( lane.type == "water" ) {
-		this.x -= lane.speed;
+		this.x -= lane.speed * (1+getLevel()/10);
 	}
-
+	
 	collideWithInsect(this.x, this.y);
 
-	if(levels.collision(this.x, this.y) || this.x > levels.getLength() || this.x < 0-levels.getLength()){
+	if(levels.collision(this.x, this.y) || this.x > levels.getLength()+1.0 || this.x < -1.0){
 		this.die();
 	}
 
-	if(levels.getHeight() == this.y) {
+	if(levels.getHeight() <= this.y+tileSize/2) {
 		this.x = this.initialX;
 		this.y = this.initialY;
 		this.nextY = this.y;
@@ -84,7 +87,7 @@ Frog.prototype.setScore = function(x) {
 
 Frog.prototype.draw = function( mv ) {
 	
-	mv = mult( mv, translate( this.x, this.y, 0.0 ) );	
+	mv = mult( mv, translate( this.x, this.y, -2.0 ) );	
 	
 	// set color to green
     gl.uniform4fv( colorLoc, GREEN );
@@ -93,7 +96,7 @@ Frog.prototype.draw = function( mv ) {
     gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
 
     // the frog
-    mv = mult( mv, scalem( 2.0, 2.0, 2.0 ) );
+    mv = mult( mv, scalem( 1.0, 1.0, 1.0 ) );
     mv = mult( mv, translate( 0.0, 0.0, 0.5 ) );
 
     gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
